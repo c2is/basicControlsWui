@@ -1,0 +1,17 @@
+#!/usr/bin/env php
+<?php
+
+/*
+ * This file is part of the c2is/bootstrap.
+ *
+ * (c) Morgan Brunot <m.brunot@c2is.fr>
+ */
+
+set_time_limit(0);
+
+require_once __DIR__.'/vendor/autoload.php';
+require_once __DIR__.'/src/bootstrap.php';
+
+$console = $app['console'];
+
+$console->run();

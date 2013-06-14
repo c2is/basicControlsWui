@@ -1,0 +1,14 @@
+/cache
+/composer.lock
+/composer.phar
+/src/Model
+/src/Resources/data
+/src/Resources/propel/databases.xml
+/src/Resources/propel/generated
+/src/Resources/propel/*.schema.xml
+/vendor
+/web/assets/plugin-*
+/web/assets/theme-*
+/default.log
+/.vagrant
+.idea
