@@ -44,10 +44,14 @@ class FeatureContext extends BehatContext
      */
     public function theWebsiteIsReachable()
     {
-        if (! $this -> client ->request('GET', $this -> parameters["base_url"])) {
-            throw new Exception(
-                "The website is unreachable'\n"
-            );
+        try {
+            if (! $this -> client ->request('GET', $this -> parameters["base_url"])) {
+                throw new Exception(
+                    "The website is unreachable'\n"
+                );
+            }
+        } catch (Exception $e) {
+            echo 'The website is unreachable: ',  $e->getMessage(), "\n";
         }
     }
 

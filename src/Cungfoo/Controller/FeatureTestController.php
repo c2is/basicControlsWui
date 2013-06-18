@@ -5,6 +5,9 @@ namespace Cungfoo\Controller;
 use Silex\Application;
 use Silex\ControllerProviderInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Console\Output\ConsoleOutput;
+use Symfony\Component\Console\Input\StringInput;
+use Symfony\Component\Process\Process;
 
 class FeatureTestController implements ControllerProviderInterface
 {
@@ -22,11 +25,11 @@ class FeatureTestController implements ControllerProviderInterface
         $ctl->match('/', function (Request $request) use ($app) {
             // some default data for when the form is displayed the first time
             $data = array(
-                'name' => 'Url to check',
+                'url' => 'http://www.google.fr',
             );
 
             $form = $app['form.factory']->createBuilder('form', $data)
-                ->add('name')
+                ->add('url')
                 ->getForm();
 
             if ('POST' == $request->getMethod()) {
@@ -34,11 +37,25 @@ class FeatureTestController implements ControllerProviderInterface
 
                 if ($form->isValid()) {
                     $data = $form->getData();
+                    $i = 0; $minBuff = "";
+                    while($i < (1500 - strlen(ob_get_contents()))){ $minBuff .= " "; $i++;}
+                    echo $minBuff;
+                    $process = new Process('export BEHAT_PARAMS="context[parameters][base_url]='.$data['url'].'";cd ../tests/functionals/;../../bin/behat');
+                    if(ini_get("output_buffering") == "Off") ob_start();
 
-                    // do something with the data
+                    echo "<pre>";
+                    $process->run(function ($type, $buffer) {
+                        if ('err' === $type) {
+                            echo ''.$buffer;
+                        } else {
+                            echo ''.$buffer;
 
-                    // redirect somewhere
-                    //return $app->redirect('http://www.google.fr/');
+                            flush();
+
+                            ob_start();
+                        }
+                    });
+                    echo "</pre>";
                 }
             }
 
