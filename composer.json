@@ -10,16 +10,24 @@
         {"type":"vcs", "url":"git2@gitlab.c2is.fr:c2is-plugin-navigation.git"},
         {"type":"vcs", "url":"git2@gitlab.c2is.fr:c2is-plugin-seo.git"},
         {"type":"vcs", "url":"git2@gitlab.c2is.fr:c2is-plugin-edito.git"},
-        {"type":"vcs", "url":"git2@gitlab.c2is.fr:c2is-plugin-export.git"}
+        {"type":"vcs", "url":"git2@gitlab.c2is.fr:c2is-plugin-export.git"},
+        {"type":"vcs", "url":"git2@gitlab.c2is.fr:c2is-plugin-context.git"}
     ],
     "require": {
         "c2is/core"             : "dev-master",
-        "c2is/theme-backend"    : "dev-master"
+        "c2is/theme-backend"    : "dev-master",
+        "behat/behat"               : "2.4.*@stable",
+        "behat/mink"                : "1.4@stable",
+        "behat/mink-goutte-driver": "*",
+        "ext-curl": "*"
     },
     "minimum-stability": "dev",
     "autoload": {
         "psr-0": {
             "": "src/"
         }
+    },
+    "config": {
+        "bin-dir": "bin/"
     }
 }

@@ -11,4 +11,5 @@
 /web/assets/theme-*
 /default.log
 /.vagrant
+/bin
 .idea
