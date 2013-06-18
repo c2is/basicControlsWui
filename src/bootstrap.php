@@ -23,6 +23,8 @@ use Knp\Provider\ConsoleServiceProvider;
 
 use Propel\Silex\PropelServiceProvider;
 
+
+
 $app = new Application(__DIR__.'/..', 'cungfoo');
 
 $app['debug'] = $app['config_core']['debug'];

@@ -7,9 +7,7 @@
  * To change this template use File | Settings | File Templates.
  */
 
-$app->get('/', function() use ($app) {
-    return $app->render('index.html.twig');
-});
 
 
-//$app->mount('/edito', new \Cungfoo\Controller\EditoController());
+$app->mount('/', new \Cungfoo\Controller\FeatureTestController());
+
