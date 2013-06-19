@@ -51,7 +51,9 @@ class FeatureContext extends BehatContext
                 );
             }
         } catch (Exception $e) {
-            echo 'The website is unreachable: ',  $e->getMessage(), "\n";
+            throw new Exception(
+                "The website is unreachable".$e->getMessage()."'\n"
+            );
         }
     }
 
