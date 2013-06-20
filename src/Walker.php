@@ -27,7 +27,7 @@ class Walker
         $clientOptions = array();
         $this -> walkerClient  = new \Behat\Mink\Driver\Goutte\Client();
         $this -> walkerClient -> setClient(new \Guzzle\Http\Client('', $clientOptions));
-        $this -> checkLinks("http://".$this -> baseUrl);
+        $this -> checkLinks($this -> baseUrl);
 
     }
 
@@ -47,7 +47,7 @@ class Walker
         foreach ($nodes as $node) {
             $prefix = "";
             if (strpos($node->value, "http:") === false) {
-                $prefix = "http://".$this -> baseUrl;
+                $prefix = $this -> baseUrl;
                 if (strpos($node->value, "/") !== 0) {
                     $prefix .= "/";
                 }

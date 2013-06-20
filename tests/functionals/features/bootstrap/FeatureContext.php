@@ -35,7 +35,6 @@ class FeatureContext extends BehatContext
         $clientOptions = array();
         $this -> client = new \Behat\Mink\Driver\Goutte\Client();
         $this -> client->setClient(new \Guzzle\Http\Client('', $clientOptions));
-        $this->driver = new \Behat\Mink\Driver\GoutteDriver($this -> client);
 
     }
 
