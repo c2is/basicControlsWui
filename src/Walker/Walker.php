@@ -40,7 +40,7 @@ class Walker
 
     }
 
-    public function checkLinks($url)
+    public function checkLinks($url, $referer = "")
     {
         $urlDomain = parse_url($url , PHP_URL_HOST);
 
@@ -50,7 +50,7 @@ class Walker
         $this->urlsVisited[] = $url;
         $crawler = $this -> walkerClient->request('GET', $url);
         $statusCode = $this -> walkerClient->getResponse()->getStatus();
-        $this->stats[] = array($url,$statusCode);
+        $this->stats[] = array($url,$statusCode,$referer);
         // getting  href attributes belonging to nodes of type "a"
         // Todo : deal or not with shortlink like Drupal ? Ex. : <link rel="shortlink" href="http://www.c2is.fr/node/25" />
         $nodes = $crawler->filterXPath('//a/@href');
@@ -71,7 +71,7 @@ class Walker
             }
 
             if (strpos($linkUri, "#") === false && strpos($linkUri, "mailto:") === false) {
-                $this->checkLinks($linkUri);
+                $this->checkLinks($linkUri, $url);
             }
 
         }
