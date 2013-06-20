@@ -37,6 +37,7 @@ class FeatureTestController implements ControllerProviderInterface
 
                 if ($form->isValid()) {
                     $data = $form->getData();
+                    echo "<b>Checking ".$data['url']."</b>";
                     $i = 0; $minBuff = "";
                     while($i < (1500 - strlen(ob_get_contents()))){ $minBuff .= " "; $i++;}
                     echo $minBuff;
