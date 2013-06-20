@@ -28,6 +28,8 @@ class FeatureTestController implements ControllerProviderInterface
                 ->add('url')
                 ->getForm()
             ;
+            $trace = "";
+            $pass = true;
 
             if ('POST' == $request->getMethod()) {
                 $form->bind($request);
@@ -53,13 +55,14 @@ class FeatureTestController implements ControllerProviderInterface
                             $trace .= $buffer;
                         }
                     });
+                    $pass = true;
+                    if ($process->getExitCode() == 1) {
+                        $pass = false;
+                    }
                 }
             }
 
-            $pass = true;
-            if ($process->getExitCode() == 1) {
-                $pass = false;
-            }
+
 
             // display the form
             return $app->render('form.html.twig', array(
