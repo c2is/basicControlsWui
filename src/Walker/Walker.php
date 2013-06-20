@@ -29,7 +29,7 @@ class Walker
         $this -> baseUrl = $baseUrl;
         $this -> subDomainsMask = $subDomainsMask;
 
-        $domain = $domain = parse_url($this -> baseUrl , PHP_URL_HOST);
+        $domain = parse_url($this -> baseUrl, PHP_URL_HOST);
         $domainWildCard = explode(".", $domain);
         $this -> domainWildCard = ".".$domainWildCard[count($domainWildCard)-2].".".$domainWildCard[count($domainWildCard)-1];
 
@@ -42,15 +42,17 @@ class Walker
 
     public function checkLinks($url, $referer = "")
     {
-        $urlDomain = parse_url($url , PHP_URL_HOST);
+        $urlDomain = parse_url($url, PHP_URL_HOST);
 
         if ( ! preg_match("`".$this -> subDomainsMask.$this -> domainWildCard."`", $urlDomain) || strpos($url, "#") !== false || in_array($url, $this->urlsVisited)) {
             return true;
         }
+
         $this->urlsVisited[] = $url;
         $crawler = $this -> walkerClient->request('GET', $url);
         $statusCode = $this -> walkerClient->getResponse()->getStatus();
         $this->stats[] = array($url,$statusCode,$referer);
+
         // getting  href attributes belonging to nodes of type "a"
         // Todo : deal or not with shortlink like Drupal ? Ex. : <link rel="shortlink" href="http://www.c2is.fr/node/25" />
         $nodes = $crawler->filterXPath('//a/@href');
@@ -66,7 +68,7 @@ class Walker
 
             $linkUri = $prefix.$node->value;
 
-            if (! in_array($linkUri,$this -> links)) {
+            if (! in_array($linkUri, $this -> links)) {
                 $this -> links[] = $linkUri;
             }
 
