@@ -21,11 +21,13 @@ class Walker
     private $baseUrl;
     private $walkerClient;
     private $domainWildCard;
-    public function __construct($baseUrl)
+    private $subDomainsMask;
+    public function __construct($baseUrl, $subDomainsMask = ".*")
     {
         $this -> links  = array();
         $this -> urlsVisited  = array();
         $this -> baseUrl = $baseUrl;
+        $this -> subDomainsMask = $subDomainsMask;
 
         $domain = $domain = parse_url($this -> baseUrl , PHP_URL_HOST);
         $domainWildCard = explode(".", $domain);
@@ -42,7 +44,7 @@ class Walker
     {
         $urlDomain = parse_url($url , PHP_URL_HOST);
 
-        if (strpos($urlDomain, $this -> domainWildCard) === false || strpos($url, "#") !== false || in_array($url, $this->urlsVisited)) {
+        if ( ! preg_match("`".$this -> subDomainsMask.$this -> domainWildCard."`", $urlDomain) || strpos($url, "#") !== false || in_array($url, $this->urlsVisited)) {
             return true;
         }
         $this->urlsVisited[] = $url;
