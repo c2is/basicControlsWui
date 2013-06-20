@@ -20,10 +20,17 @@ class Walker
     private $stats;
     private $baseUrl;
     private $walkerClient;
+    private $domainWildCard;
     public function __construct($baseUrl)
     {
         $this -> links  = array();
+        $this -> urlsVisited  = array();
         $this -> baseUrl = $baseUrl;
+
+        $domain = $domain = parse_url($this -> baseUrl , PHP_URL_HOST);
+        $domainWildCard = explode(".", $domain);
+        $this -> domainWildCard = ".".$domainWildCard[count($domainWildCard)-2].".".$domainWildCard[count($domainWildCard)-1];
+
         $clientOptions = array();
         $this -> walkerClient  = new \Behat\Mink\Driver\Goutte\Client();
         $this -> walkerClient -> setClient(new \Guzzle\Http\Client('', $clientOptions));
@@ -33,13 +40,15 @@ class Walker
 
     public function checkLinks($url)
     {
-        if (strpos($url, $this -> baseUrl) === false || strpos($url, "#") !== false) {
+        $urlDomain = parse_url($url , PHP_URL_HOST);
+
+        if (strpos($urlDomain, $this -> domainWildCard) === false || strpos($url, "#") !== false || in_array($url, $this->urlsVisited)) {
             return true;
         }
-
+        $this->urlsVisited[] = $url;
         $crawler = $this -> walkerClient->request('GET', $url);
         $statusCode = $this -> walkerClient->getResponse()->getStatus();
-
+        $this->stats[] = array($url,$statusCode);
         // getting  href attributes belonging to nodes of type "a"
         // Todo : deal or not with shortlink like Drupal ? Ex. : <link rel="shortlink" href="http://www.c2is.fr/node/25" />
         $nodes = $crawler->filterXPath('//a/@href');
@@ -55,9 +64,11 @@ class Walker
 
             $linkUri = $prefix.$node->value;
 
-            if (! in_array($linkUri, $this->links) && strpos($linkUri, "#") === false && strpos($linkUri, "mailto:") === false) {
-                $this->links[] = $linkUri;
-                $this->stats[] = array($linkUri,$statusCode);
+            if (! in_array($linkUri,$this -> links)) {
+                $this -> links[] = $linkUri;
+            }
+
+            if (strpos($linkUri, "#") === false && strpos($linkUri, "mailto:") === false) {
                 $this->checkLinks($linkUri);
             }
 
@@ -68,4 +79,10 @@ class Walker
     {
         return $this -> stats;
     }
+
+    public function getLinks()
+    {
+        return $this -> links;
+    }
+
 }
