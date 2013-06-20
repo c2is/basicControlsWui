@@ -1,27 +1,21 @@
 {
-    "name": "c2is/bootstrap",
+    "name": "c2is/basic-controls-wui",
     "authors": [
-        {"name" : "Morgan Brunot", "email": "m.brunot@c2is.fr"},
-        {"name" : "Guillaume Manen", "email": "g.manen@c2is.fr"}
+        {"name" : "André Cianfarani", "email": "a.cianfarani@c2is.fr"}
     ],
     "repositories": [
         {"type":"vcs", "url":"git2@gitlab.c2is.fr:c2is-core.git"},
-        {"type":"vcs", "url":"git2@gitlab.c2is.fr:c2is-theme-backend.git"},
-        {"type":"vcs", "url":"git2@gitlab.c2is.fr:c2is-plugin-navigation.git"},
-        {"type":"vcs", "url":"git2@gitlab.c2is.fr:c2is-plugin-seo.git"},
-        {"type":"vcs", "url":"git2@gitlab.c2is.fr:c2is-plugin-edito.git"},
-        {"type":"vcs", "url":"git2@gitlab.c2is.fr:c2is-plugin-export.git"},
-        {"type":"vcs", "url":"git2@gitlab.c2is.fr:c2is-plugin-context.git"}
+        {"type":"vcs", "url":"git2@gitlab.c2is.fr:c2is-theme-backend.git"}
     ],
     "require": {
-        "c2is/core"             : "dev-master",
-        "c2is/theme-backend"    : "dev-master",
-        "behat/behat"               : "2.4.*@stable",
-        "behat/mink"                : "1.4@stable",
+        "c2is/core"               : "dev-master",
+        "c2is/theme-backend"      : "dev-master",
+        "behat/behat"             : "2.4.*@stable",
+        "behat/mink"              : "1.4@stable",
         "behat/mink-goutte-driver": "*",
-        "ext-curl": "*",
-        "symfony/console": "2.2.*",
-        "symfony/process": "2.2.*"
+        "ext-curl"                : "*",
+        "symfony/console"         : "2.2.*",
+        "symfony/process"         : "2.2.*"
     },
     "minimum-stability": "dev",
     "autoload": {

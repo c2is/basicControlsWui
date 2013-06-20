@@ -1,12 +1,20 @@
-<!doctype html>
-<html lang="fr">
-<head>
-    <meta charset="utf-8">
-    <link rel="stylesheet" href="{{ app.request.basePath }}/assets/css/screen.css">
-    <script>var basePath = "{{ app.request.basePath }}";</script>
-</head>
-<body>
-{% block content %}{% endblock %}
-<script src="{{ app.request.basePath }}/assets/js/front.js"></script>
-</body>
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>basicControlsWui / C2is</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='http://fonts.googleapis.com/css?family=Lato:700' rel='stylesheet' type='text/css'>
+        <link href="{{ app.request.basePath }}/assets/css/custom.css" rel="stylesheet">
+    </head>
+    <body>
+        <div class="container">
+            <div class="demo-headline">
+                <h1>basicControlsWui</h1>
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+        {% block trace %}
+        {% endblock %}
+    </body>
 </html>

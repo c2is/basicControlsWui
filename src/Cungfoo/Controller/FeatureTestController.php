@@ -24,44 +24,50 @@ class FeatureTestController implements ControllerProviderInterface
 
         $ctl->match('/', function (Request $request) use ($app) {
             // some default data for when the form is displayed the first time
-            $data = array(
-                'url' => 'http://www.google.fr',
-            );
-
-            $form = $app['form.factory']->createBuilder('form', $data)
+            $form = $app['form.factory']->createBuilder('form')
                 ->add('url')
-                ->getForm();
+                ->getForm()
+            ;
 
             if ('POST' == $request->getMethod()) {
                 $form->bind($request);
 
                 if ($form->isValid()) {
+                    $trace = '';
+
                     $data = $form->getData();
+
                     echo "<b>Checking ".$data['url']."</b>";
                     $i = 0; $minBuff = "";
                     while($i < (1500 - strlen(ob_get_contents()))){ $minBuff .= " "; $i++;}
                     echo $minBuff;
+
                     $process = new Process('export BEHAT_PARAMS="context[parameters][base_url]='.$data['url'].'";cd ../tests/functionals/;../../bin/behat');
-                    if(ini_get("output_buffering") == "Off") ob_start();
 
-                    echo "<pre>";
-                    $process->run(function ($type, $buffer) {
+                    $process->run(function ($type, $buffer) use (&$trace) {
+
                         if ('err' === $type) {
-                            echo ''.$buffer;
+                            $trace .= $buffer;
                         } else {
-                            echo ''.$buffer;
-
-                            flush();
-
-                            ob_start();
+                            $trace .= $buffer;
                         }
                     });
-                    echo "</pre>";
                 }
             }
 
+            preg_match('/([0-9]) scénario(s)* \(([0-9]) (.*)\)/', $trace, $matches);
+
+            $pass = true;
+            if ($matches[4] === 'échecs') {
+                $pass = false;
+            }
+
             // display the form
-            return $app->render('form.html.twig', array('form' => $form->createView()));
+            return $app->render('form.html.twig', array(
+                'form'  => $form->createView(),
+                'trace' => $trace,
+                'pass'  => $pass,
+            ));
         });
         return $ctl;
     }
