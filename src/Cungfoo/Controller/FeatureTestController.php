@@ -55,10 +55,8 @@ class FeatureTestController implements ControllerProviderInterface
                 }
             }
 
-            preg_match('/([0-9]) scénario(s)* \(([0-9]) (.*)\)/', $trace, $matches);
-
             $pass = true;
-            if ($matches[4] === 'échecs') {
+            if ($process->getExitCodeText() === 'General error') {
                 $pass = false;
             }
 
