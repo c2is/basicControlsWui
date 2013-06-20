@@ -37,7 +37,6 @@ class FeatureTestController implements ControllerProviderInterface
 
                     $data = $form->getData();
 
-                    echo "<b>Checking ".$data['url']."</b>";
                     $i = 0; $minBuff = "";
                     while($i < (1500 - strlen(ob_get_contents()))){ $minBuff .= " "; $i++;}
                     echo $minBuff;
@@ -56,7 +55,7 @@ class FeatureTestController implements ControllerProviderInterface
             }
 
             $pass = true;
-            if ($process->getExitCodeText() === 'General error') {
+            if ($process->getExitCode() == 1) {
                 $pass = false;
             }
 
