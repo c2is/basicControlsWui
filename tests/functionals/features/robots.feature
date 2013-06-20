@@ -7,7 +7,7 @@ Scenario: read robots.txt file
   When I get the robots.txt
   Then I should not get:
     """
-    (\n|^)[^#a-zA-Z]*Disallow: /[* ]*\n
+    (\n|^)[^#a-zA-Z]*Disallow: /[* ]*(\n|$)
     """
   When I get the home html source
   Then I should not get:
