@@ -37,6 +37,9 @@ class FeatureTestController implements ControllerProviderInterface
 
                     $data = $form->getData();
 
+                    $i = 0; $minBuff = "";
+                    while($i < (1500 - strlen(ob_get_contents()))){ $minBuff .= " "; $i++;}
+
                     $process = new Process('export BEHAT_PARAMS="context[parameters][base_url]='.$data['url'].'";cd ../tests/functionals/;../../bin/behat');
 
                     $process->run(function ($type, $buffer) use (&$trace) {
