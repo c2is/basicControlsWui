@@ -42,12 +42,10 @@ class Walker
 
     public function checkLinks($url, $referer = "")
     {
-        $urlDomain = parse_url($url, PHP_URL_HOST);
 
-        if ( ! preg_match("`".$this -> subDomainsMask.$this -> domainWildCard."`", $urlDomain) || strpos($url, "#") !== false || in_array($url, $this->urlsVisited)) {
+        if (! $this -> isUrlToCheck($url, $referer)) {
             return true;
         }
-
         $this->urlsVisited[] = $url;
         $crawler = $this -> walkerClient->request('GET', $url);
         $statusCode = $this -> walkerClient->getResponse()->getStatus();
@@ -76,6 +74,34 @@ class Walker
                 $this->checkLinks($linkUri, $url);
             }
 
+        }
+    }
+    public function isUrlToCheck($url, $referer) {
+        $urlDomain = parse_url($url, PHP_URL_HOST);
+
+        if (in_array($url, $this->urlsVisited)) {
+            if ($referer != "") {
+                $this -> updateStat($url, $referer);
+            }
+            return false;
+        }
+
+        if ( ! preg_match("`".$this -> subDomainsMask.$this -> domainWildCard."`", $urlDomain) || strpos($url, "#") !== false) {
+            return false;
+        }
+
+        return true;
+    }
+    public function updateStat($url, $referer){
+        foreach ($this -> stats as $index=>$line) {
+            if ($line[0] == $url) {
+                $key = $index;
+            }
+        }
+        if (strpos($this -> stats[$key][2], $referer) === false) {
+            $tmpContent = explode(",", $this -> stats[$key][2]);
+            $tmpContent[] = $referer;
+            $this -> stats[$key][2] = implode(",", $tmpContent);
         }
     }
 
