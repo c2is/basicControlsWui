@@ -35,20 +35,10 @@ class FeatureTestController implements ControllerProviderInterface
                 $form->bind($request);
 
                 if ($form->isValid()) {
-                    $trace = '';
 
                     $data = $form->getData();
-
-                    $i = 0; $minBuff = "";
-                    while($i < (1500 - strlen(ob_get_contents()))){ $minBuff .= " "; $i++;}
-                    echo $minBuff;
-                    if(ini_get("output_buffering") == "Off") {
-                        ob_start();
-                    }
                     $process = new Process('export BEHAT_PARAMS="context[parameters][base_url]='.$data['url'].'";cd ../tests/functionals/;../../bin/behat');
-
-                    $process->run(function ($type, $buffer) use (&$trace) {
-
+                    $process->run(function ($type, $buffer) use(&$trace){
                         if ('err' === $type) {
                             $trace .= $buffer;
                         } else {
