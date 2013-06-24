@@ -7,9 +7,10 @@
 {% endblock %}
 
 {% block trace %}
-{% if trace %}
-<pre {% if pass %}class="pass"{% endif %}>
-{{ trace|raw }}
-</pre>
+{% if urlToCheck %}
+
+<iframe id="ifr" src="{{ app.request.basePath }}/iframe?urlToCheck={{ urlToCheck }}"></iframe>
 {% endif %}
+
 {% endblock %}
+

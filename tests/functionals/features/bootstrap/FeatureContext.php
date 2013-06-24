@@ -14,6 +14,7 @@ use Behat\Gherkin\Node\PyStringNode,
 //   require_once 'PHPUnit/Framework/Assert/Functions.php';
 //
 
+
 /**
  * Features context.
  */
@@ -84,5 +85,35 @@ class FeatureContext extends BehatContext
                 "Forbidden string found: ".$matches[0]."\n"
             );
         }
+    }
+
+    /**
+     * @When /^I crawl all the website$/
+     */
+    public function iCrawlAllTheWebsite()
+    {
+        $this -> walker = new \Walker\Walker($this -> parameters["base_url"]);
+    }
+
+    /**
+     * @Then /^I sould not find page with status$/
+     */
+    public function iSouldNotFindPageWithStatus(PyStringNode $string)
+    {
+
+        $stats = $this -> walker -> getStats();
+        $badUrls = array();
+        foreach ($stats as $info) {
+            if ((string) $info[1] == $string) {
+                $badUrls[] = $info[0];
+            }
+        }
+
+        if (count($badUrls) > 0) {
+            throw new Exception(
+                "Pages with status ".$string." found: \n".implode("\n",$badUrls)."\n"
+            );
+        }
+
     }
 }

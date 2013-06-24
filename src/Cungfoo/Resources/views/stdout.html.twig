@@ -1,0 +1,7 @@
+{% block traceline %}
+{% if traceline %}
+<pre {% if pass %}class="pass"{% endif %}>
+{{ trace|raw }}
+</pre>
+{% endif %}
+{% endblock %}

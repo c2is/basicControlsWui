@@ -30,6 +30,7 @@ class FeatureTestController implements ControllerProviderInterface
             ;
             $trace = "";
             $pass = true;
+            $data = "";
 
             if ('POST' == $request->getMethod()) {
                 $form->bind($request);
@@ -37,29 +38,61 @@ class FeatureTestController implements ControllerProviderInterface
                 if ($form->isValid()) {
 
                     $data = $form->getData();
-                    $process = new Process('export BEHAT_PARAMS="context[parameters][base_url]='.$data['url'].'";cd ../tests/functionals/;../../bin/behat');
-                    $process->run(function ($type, $buffer) use(&$trace){
-                        if ('err' === $type) {
-                            $trace .= $buffer;
-                        } else {
-                            $trace .= $buffer;
-                        }
-                    });
-                    $pass = true;
-                    if ($process->getExitCode() == 1) {
-                        $pass = false;
-                    }
+
                 }
+
             }
 
-
-
+            $urlToCheck = (is_array($data))? $data['url']:"";
             // display the form
             return $app->render('form.html.twig', array(
                 'form'  => $form->createView(),
                 'trace' => $trace,
                 'pass'  => $pass,
+                'urlToCheck'  => $urlToCheck,
             ));
+        });
+
+        $ctl->match('/iframe', function (Request $request) use ($app) {
+
+
+            $urlToCheck = $request->query->get('urlToCheck');
+
+            $stream = function () use($urlToCheck, $request){
+                echo "<html>";
+                echo '<link href="'.$request->getBasePath().'/assets/css/custom.css" rel="stylesheet">';
+                echo '<script src="'.$request->getBasePath().'/assets/theme-backend/js/scripts.js"></script>';
+                echo '<script src="'.$request->getBasePath().'/assets/js/custom.js"></script>';
+                echo "<pre id='stdout'  class=''>";
+                echo '<script language="JavaScript">
+                $(window.parent.document).ready(function() {
+                    $("body").animate({ scrollTop: $(document).height() }, 7000);
+                });
+                </script>';
+                echo "<body>";
+                flush();
+                $process = new Process('export BEHAT_PARAMS="context[parameters][base_url]='.$urlToCheck.'";cd ../tests/functionals/;../../bin/behat');
+                $process->run(function ($type, $buffer) {
+                    if ('err' === $type) {
+                        echo $buffer;
+                    } else {
+                        echo $buffer;
+                        flush();
+                    }
+                });
+                echo "</pre>";
+                if ($process->getExitCode() == 1) {
+                    echo '<script language="JavaScript">$("#stdout").attr("class", "failed");</script>';
+                    flush();
+                }
+                else {
+                    echo '<script language="JavaScript">$("#stdout").attr("class", "pass");</script>';
+                    flush();
+                }
+                echo "</body></html>";
+                flush();
+            };
+            return $app->stream($stream);
         });
         return $ctl;
     }
