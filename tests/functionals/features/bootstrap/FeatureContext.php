@@ -96,9 +96,9 @@ class FeatureContext extends BehatContext
     }
 
     /**
-     * @Then /^I sould not find page with status$/
+     * @Then /^I should not get page with status$/
      */
-    public function iSouldNotFindPageWithStatus(PyStringNode $string)
+    public function iShouldNotGetPageWithStatus(PyStringNode $string)
     {
 
         $stats = $this -> walker -> getStats();

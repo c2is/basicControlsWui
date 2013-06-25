@@ -59,17 +59,20 @@ class FeatureTestController implements ControllerProviderInterface
             $urlToCheck = $request->query->get('urlToCheck');
 
             $stream = function () use($urlToCheck, $request){
+                echo "<!DOCTYPE html>";
                 echo "<html>";
+                echo "<head>";
                 echo '<link href="'.$request->getBasePath().'/assets/css/custom.css" rel="stylesheet">';
                 echo '<script src="'.$request->getBasePath().'/assets/theme-backend/js/scripts.js"></script>';
                 echo '<script src="'.$request->getBasePath().'/assets/js/custom.js"></script>';
-                echo "<pre id='stdout'  class=''>";
                 echo '<script language="JavaScript">
                 $(window.parent.document).ready(function() {
                     $("body").animate({ scrollTop: $(document).height() }, 7000);
                 });
                 </script>';
+                echo "<head>";
                 echo "<body>";
+                echo "<pre id='stdout'  class=''>";
                 flush();
                 $process = new Process('export BEHAT_PARAMS="context[parameters][base_url]='.$urlToCheck.'";cd ../tests/functionals/;../../bin/behat');
                 $process->run(function ($type, $buffer) {

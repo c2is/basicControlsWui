@@ -2,7 +2,7 @@ Feature: robots
   Check if rules exist forbidding bots to crawl the website
   As an anonymous user
   I check the html code and the robots.txt file
-Scenario: read robots.txt file
+Scenario: read robots.txt file and check metatags
   Given the website is reachable
   When I get the robots.txt
   Then I should not get:
@@ -17,9 +17,4 @@ Scenario: read robots.txt file
   Then I should not get:
     """
     nofollow
-    """
-  When I crawl all the website
-  Then I should not find page with status
-    """
-    404
     """

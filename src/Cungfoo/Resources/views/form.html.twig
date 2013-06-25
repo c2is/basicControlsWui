@@ -8,8 +8,9 @@
 
 {% block trace %}
 {% if urlToCheck %}
-
-<iframe id="ifr" src="{{ app.request.basePath }}/iframe?urlToCheck={{ urlToCheck }}"></iframe>
+<div>
+    <iframe id="ifr" src="{{ app.request.basePath }}/iframe?urlToCheck={{ urlToCheck }}">Functionality unavailable in your browser</iframe>
+</div>
 {% endif %}
 
 {% endblock %}
