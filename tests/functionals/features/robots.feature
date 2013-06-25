@@ -19,7 +19,7 @@ Scenario: read robots.txt file
     nofollow
     """
   When I crawl all the website
-  Then I sould not find page with status
+  Then I should not find page with status
     """
     404
     """
