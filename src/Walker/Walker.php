@@ -36,11 +36,19 @@ class Walker
         $clientOptions = array();
         $this -> walkerClient  = new \Behat\Mink\Driver\Goutte\Client();
         $this -> walkerClient -> setClient(new \Guzzle\Http\Client('', $clientOptions));
-        $this -> checkLinks($this -> baseUrl);
+
 
     }
 
-    public function checkLinks($url, $referer = "")
+    public function start($callback = null) {
+        $this -> checkLinks($this -> baseUrl, null, $callback);
+    }
+
+    public function run($callback = null) {
+        $this -> checkLinks($this -> baseUrl, null, $callback);
+    }
+
+    public function checkLinks($url, $referer = "", $callback = null)
     {
 
         if (! $this -> isUrlToCheck($url, $referer)) {
@@ -50,6 +58,10 @@ class Walker
         $crawler = $this -> walkerClient->request('GET', $url);
         $statusCode = $this -> walkerClient->getResponse()->getStatus();
         $this->stats[] = array($url,$statusCode,$referer);
+
+        if (null !== $callback) {
+            call_user_func($callback, $this -> walkerClient,array($url,$statusCode,$referer));
+        }
 
         // getting  href attributes belonging to nodes of type "a"
         // Todo : deal or not with shortlink like Drupal ? Ex. : <link rel="shortlink" href="http://www.c2is.fr/node/25" />
@@ -71,7 +83,7 @@ class Walker
             }
 
             if (strpos($linkUri, "#") === false && strpos($linkUri, "mailto:") === false) {
-                $this->checkLinks($linkUri, $url);
+                $this->checkLinks($linkUri, $url, $callback);
             }
 
         }
