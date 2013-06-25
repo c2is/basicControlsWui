@@ -91,6 +91,12 @@ class FeatureContext extends BehatContext
     public function iCrawlAllTheWebsite()
     {
         $this -> walker = new \Walker\Walker($this -> parameters["base_url"]);
+        echo "\nCrawling Website in process...";
+        $this -> walker -> run(function ($client, $stats) {
+            echo "\n".$stats[0]." : ".$stats[1];
+            flush();
+        });
+
     }
 
     /**
