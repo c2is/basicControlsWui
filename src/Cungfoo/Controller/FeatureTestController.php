@@ -74,7 +74,8 @@ class FeatureTestController implements ControllerProviderInterface
                 echo "<body>";
                 echo "<pre id='stdout'  class=''>";
                 flush();
-                $process = new Process('export BEHAT_PARAMS="context[parameters][base_url]='.$urlToCheck.'";cd ../tests/functionals/;../../bin/behat');
+                $procTimeOut = 3600;
+                $process = new Process('export BEHAT_PARAMS="context[parameters][base_url]='.$urlToCheck.'";cd ../tests/functionals/;../../bin/behat',null, null, null,$procTimeOut);
                 $process->run(function ($type, $buffer) {
                     if ('err' === $type) {
                         echo $buffer;
