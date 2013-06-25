@@ -33,10 +33,7 @@ class FeatureContext extends BehatContext
          * export BEHAT_PARAMS="context[parameters][base_url]=http://localhost"
          */
         $this ->parameters = $parameters;
-        $clientOptions = array();
-        $this -> client = new \Behat\Mink\Driver\Goutte\Client();
-        $this -> client->setClient(new \Guzzle\Http\Client('', $clientOptions));
-
+        $this -> client = new \Goutte\Client();
     }
 
     /**
@@ -50,6 +47,7 @@ class FeatureContext extends BehatContext
                     "The website is unreachable'\n"
                 );
             }
+
         } catch (Exception $e) {
             throw new Exception(
                 "The website is unreachable".$e->getMessage()."'\n"
