@@ -29,7 +29,9 @@ class Walker
         $this -> urlsVisited  = array();
         $this -> baseUrl = $baseUrl;
         $this -> subDomainsMask = $subDomainsMask;
-
+        if (strrpos($this -> baseUrl, "/") == strlen($this -> baseUrl)-1) {
+            $this -> baseUrl = substr($this -> baseUrl,0,strlen($this -> baseUrl)-1);
+        }
         $this -> excludedFileExt = "`\.(jpg|jpeg|gif|png)$`i";
 
         $domain = parse_url($this -> baseUrl, PHP_URL_HOST);
