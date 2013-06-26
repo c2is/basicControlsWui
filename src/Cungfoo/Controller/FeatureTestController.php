@@ -85,12 +85,12 @@ class FeatureTestController implements ControllerProviderInterface
                     }
                 });
                 echo "</pre>";
-                if ($process->getExitCode() == 1) {
-                    echo '<script language="JavaScript">$("#stdout").attr("class", "failed");</script>';
+                if ($process->getExitCode() == 0) {
+                    echo '<script language="JavaScript">$("#stdout").attr("class", "pass");</script>';
                     flush();
                 }
                 else {
-                    echo '<script language="JavaScript">$("#stdout").attr("class", "pass");</script>';
+                    echo '<script language="JavaScript">$("#stdout").attr("class", "failed");</script>';
                     flush();
                 }
                 echo "</body></html>";
