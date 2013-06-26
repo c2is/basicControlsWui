@@ -96,7 +96,7 @@ class FeatureContext extends BehatContext
             echo "\n".$stats[0]." : ".$stats[1];
             flush();
         });
-
+        echo "\n";
     }
 
     /**
