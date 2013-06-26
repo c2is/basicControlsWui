@@ -23,16 +23,19 @@ class Walker
     private $domainWildCard;
     private $subDomainsMask;
     private $excludedFileExt;
+    private $forbiddenPattern;
     public function __construct($baseUrl, $subDomainsMask = ".*")
     {
         $this -> links  = array();
         $this -> urlsVisited  = array();
         $this -> baseUrl = $baseUrl;
-        $this -> subDomainsMask = $subDomainsMask;
         if (strrpos($this -> baseUrl, "/") == strlen($this -> baseUrl)-1) {
             $this -> baseUrl = substr($this -> baseUrl,0,strlen($this -> baseUrl)-1);
         }
+        $this -> subDomainsMask = $subDomainsMask;
         $this -> excludedFileExt = "`\.(jpg|jpeg|gif|png)$`i";
+
+        $this -> forbiddenPattern = array("mailto", "#");
 
         $domain = parse_url($this -> baseUrl, PHP_URL_HOST);
         $domainWildCard = explode(".", $domain);
@@ -87,7 +90,7 @@ class Walker
                 $this -> links[] = $linkUri;
             }
 
-            if (strpos($linkUri, "#") === false && strpos($linkUri, "mailto:") === false) {
+            if ($this -> isValidUrl($linkUri)) {
                 $this->checkLinks($linkUri, $url, $callback);
             }
 
@@ -102,11 +105,22 @@ class Walker
             }
             return false;
         }
-
-        if ( ! preg_match("`".$this -> subDomainsMask.$this -> domainWildCard."`", $urlDomain) || strpos($url, "#") !== false || preg_match($this -> excludedFileExt,$url)) {
+        if (! $this -> isValidUrl($url)) {
+            return false;
+        }
+        if ( ! preg_match("`".$this -> subDomainsMask.$this -> domainWildCard."`", $urlDomain) || preg_match($this -> excludedFileExt,$url)) {
             return false;
         }
 
+        return true;
+    }
+    public function isValidUrl($url){
+        foreach ($this -> forbiddenPattern as $pattern) {
+            if (strpos($url,$pattern) !== false) {
+                return false;
+                break;
+            }
+        }
         return true;
     }
     public function updateStat($url, $referer){
