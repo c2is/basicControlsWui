@@ -22,12 +22,15 @@ class Walker
     private $walkerClient;
     private $domainWildCard;
     private $subDomainsMask;
+    private $excludedFileExt;
     public function __construct($baseUrl, $subDomainsMask = ".*")
     {
         $this -> links  = array();
         $this -> urlsVisited  = array();
         $this -> baseUrl = $baseUrl;
         $this -> subDomainsMask = $subDomainsMask;
+
+        $this -> excludedFileExt = "`\.(jpg|jpeg|gif|png)$`i";
 
         $domain = parse_url($this -> baseUrl, PHP_URL_HOST);
         $domainWildCard = explode(".", $domain);
@@ -98,7 +101,7 @@ class Walker
             return false;
         }
 
-        if ( ! preg_match("`".$this -> subDomainsMask.$this -> domainWildCard."`", $urlDomain) || strpos($url, "#") !== false) {
+        if ( ! preg_match("`".$this -> subDomainsMask.$this -> domainWildCard."`", $urlDomain) || strpos($url, "#") !== false || preg_match($this -> excludedFileExt,$url)) {
             return false;
         }
 
