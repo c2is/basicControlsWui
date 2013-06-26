@@ -35,7 +35,7 @@ class Walker
         $this -> subDomainsMask = $subDomainsMask;
         $this -> excludedFileExt = "`\.(jpg|jpeg|gif|png)$`i";
 
-        $this -> forbiddenPattern = array("mailto", "#");
+        $this -> forbiddenPattern = array("mailto", "#", "javascript");
 
         $domain = parse_url($this -> baseUrl, PHP_URL_HOST);
         $domainWildCard = explode(".", $domain);
@@ -120,6 +120,9 @@ class Walker
                 return false;
                 break;
             }
+        }
+        if (! filter_var($url, FILTER_VALIDATE_URL)) {
+            return false;
         }
         return true;
     }
