@@ -7,6 +7,8 @@
  * To change this template use File | Settings | File Templates.
  */
 namespace Walker;
+
+
 /**
  * A simple wrapper around Goutte to crawl a website
  *
@@ -17,7 +19,7 @@ namespace Walker;
 class Walker
 {
     private $links;
-    private $stats;
+    public $stats;
     private $baseUrl;
     private $walkerClient;
     private $domainWildCard;
@@ -41,9 +43,18 @@ class Walker
         $domainWildCard = explode(".", $domain);
         $this -> domainWildCard = ".".$domainWildCard[count($domainWildCard)-2].".".$domainWildCard[count($domainWildCard)-1];
 
-        $clientOptions = array();
-        $this -> walkerClient  = new \Behat\Mink\Driver\Goutte\Client();
+        $clientOptions = array(
+            'curl.options' => array(
+                CURLOPT_CONNECTTIMEOUT      => 150,
+                CURLOPT_TIMEOUT      => 150,
+                CURLOPT_CONNECTTIMEOUT_MS      => 150000,
+                CURLOPT_LOW_SPEED_LIMIT      => 0,
+                CURLOPT_LOW_SPEED_TIME      => 0
+            ));
+        $this -> walkerClient  = new \Walker\Client();
         $this -> walkerClient -> setClient(new \Guzzle\Http\Client('', $clientOptions));
+        $this -> walkerClient->setWalker($this);
+        $this -> walkerClient -> setMaxRedirects(10);
 
 
     }
@@ -62,8 +73,14 @@ class Walker
         if (! $this -> isUrlToCheck($url, $referer)) {
             return true;
         }
-        $this->urlsVisited[] = $url;
+        if( ! $this -> isValidUrl($url)) {
+            return true;
+        }
+
+
         $crawler = $this -> walkerClient->request('GET', $url);
+
+
         $statusCode = $this -> walkerClient->getResponse()->getStatus();
         $this->stats[] = array($url,$statusCode,$referer);
 
@@ -115,6 +132,9 @@ class Walker
         return true;
     }
     public function isValidUrl($url){
+        if (! is_string ( $url )) {
+            return false;
+        }
         foreach ($this -> forbiddenPattern as $pattern) {
             if (strpos($url,$pattern) !== false) {
                 return false;
@@ -131,6 +151,12 @@ class Walker
             if ($line[0] == $url) {
                 $key = $index;
             }
+        }
+        // if this url has been call internally by the browserkit client (within redirect)
+        if (!$key) {
+            $this -> stats[][0] = $url;
+            $this -> stats[][1] = $this -> walkerClient->getResponse()->getStatus();
+            $key = count(stats) - 1;
         }
         if (strpos($this -> stats[$key][2], $referer) === false) {
             $tmpContent = explode(",", $this -> stats[$key][2]);

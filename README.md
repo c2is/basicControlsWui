@@ -22,3 +22,10 @@ Using, in your nginx.conf set:
 gzip off; 
 proxy_buffering off; 
 ```
+
+After install need to hack this file /Users/andre/Documents/Work/Wiwi/vendor/symfony/browser-kit/Symfony/Component/BrowserKit/Client.php
+to add:
+ if(is_object($uri)){
+   $uri = $uri -> __toString();
+ }
+as the first line of the function getAbsoluteUri($uri)
