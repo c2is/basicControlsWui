@@ -14,23 +14,32 @@ use Symfony\Component\BrowserKit\Response;
 class Client extends BaseClient
 {
     private $walker;
+    public $lastReferer;
+    private $lastStatus;
+    private $lastUri;
     public function doRequest($request) {
         $uri = $request->getUri();
-        if ($this -> walker->isUrlToCheck($uri,"")) {
-
+        if ($this->walker->isUrlToCheck($uri,"")) {
             $response = parent::doRequest($request);
             $statusCode = $response->getStatus();
+
+            $this->lastUri = $uri;
+            $this->lastStatus = $statusCode;
+            $this->walker->stats[] = array($uri,$statusCode,$this->lastReferer);
         }
         else {
             $headers[] = "";
             $statusCode = "202";
             $response = new Response("", $statusCode, $headers);
         }
-        $this -> walker->urlsVisited[] = $uri;
+        $this->walker->urlsVisited[] = $uri;
         return $response;
 
     }
     public function setWalker(Walker $walker) {
-        $this -> walker = $walker;
+        $this->walker = $walker;
+    }
+    public function getStats() {
+        return array($this->lastUri, $this->lastStatus, $this->lastReferer);
     }
 }

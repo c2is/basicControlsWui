@@ -26,66 +26,70 @@ class Walker
     private $subDomainsMask;
     private $excludedFileExt;
     private $forbiddenPattern;
-    public function __construct($baseUrl, $subDomainsMask = ".*")
+    public function __construct($baseUrl, $subDomainsMask = null)
     {
-        $this -> links  = array();
-        $this -> urlsVisited  = array();
-        $this -> baseUrl = $baseUrl;
-        if (strrpos($this -> baseUrl, "/") == strlen($this -> baseUrl)-1) {
-            $this -> baseUrl = substr($this -> baseUrl,0,strlen($this -> baseUrl)-1);
+        $this->links  = array();
+        $this->urlsVisited  = array();
+        $this->baseUrl = $baseUrl;
+        if (strrpos($this->baseUrl, "/") == strlen($this->baseUrl)-1) {
+            $this->baseUrl = substr($this->baseUrl,0,strlen($this->baseUrl)-1);
         }
-        $this -> subDomainsMask = $subDomainsMask;
-        $this -> excludedFileExt = "`\.(jpg|jpeg|gif|png)$`i";
 
-        $this -> forbiddenPattern = array("mailto", "#", "javascript");
+        $this->excludedFileExt = "`\.(jpg|jpeg|gif|png)$`i";
+        $this->forbiddenPattern = array("mailto", "#", "javascript");
 
-        $domain = parse_url($this -> baseUrl, PHP_URL_HOST);
+        // get the end of domain : xx.xx.xxx.domaine.com will get .domain.com
+        $domain = parse_url($this->baseUrl, PHP_URL_HOST);
         $domainWildCard = explode(".", $domain);
-        $this -> domainWildCard = ".".$domainWildCard[count($domainWildCard)-2].".".$domainWildCard[count($domainWildCard)-1];
+        $this->domainWildCard = ".".$domainWildCard[count($domainWildCard)-2].".".$domainWildCard[count($domainWildCard)-1];
+
+        if ($subDomainsMask != null) {
+            $this->subDomainsMask = $subDomainsMask;
+        }
+        else {
+            $this->subDomainsMask = str_replace($this->domainWildCard,"",$domain);
+        }
 
         $clientOptions = array(
             'curl.options' => array(
                 CURLOPT_CONNECTTIMEOUT      => 150,
-                CURLOPT_TIMEOUT      => 150,
+                CURLOPT_TIMEOUT      => 300,
                 CURLOPT_CONNECTTIMEOUT_MS      => 150000,
                 CURLOPT_LOW_SPEED_LIMIT      => 0,
                 CURLOPT_LOW_SPEED_TIME      => 0
             ));
-        $this -> walkerClient  = new \Walker\Client();
-        $this -> walkerClient -> setClient(new \Guzzle\Http\Client('', $clientOptions));
-        $this -> walkerClient->setWalker($this);
-        $this -> walkerClient -> setMaxRedirects(10);
+        $this->walkerClient  = new \Walker\Client();
+        $this->walkerClient -> setClient(new \Guzzle\Http\Client('', $clientOptions));
+        $this->walkerClient->setWalker($this);
+        $this->walkerClient -> setMaxRedirects(10);
 
 
     }
 
     public function start($callback = null) {
-        $this -> checkLinks($this -> baseUrl, null, $callback);
+        $this->checkLinks($this->baseUrl, null, $callback);
     }
 
     public function run($callback = null) {
-        $this -> checkLinks($this -> baseUrl, null, $callback);
+        $this->checkLinks($this->baseUrl, null, $callback);
     }
 
     public function checkLinks($url, $referer = "", $callback = null)
     {
 
-        if (! $this -> isUrlToCheck($url, $referer)) {
+        if (! $this->isUrlToCheck($url, $referer)) {
             return true;
         }
-        if( ! $this -> isValidUrl($url)) {
+        if( ! $this->isValidUrl($url)) {
             return true;
         }
 
+        $this->walkerClient -> lastReferer = $referer;
+        $crawler = $this->walkerClient->request('GET', $url);
 
-        $crawler = $this -> walkerClient->request('GET', $url);
-
-
-        $statusCode = $this -> walkerClient->getResponse()->getStatus();
-        $this->stats[] = array($url,$statusCode,$referer);
 
         if (null !== $callback) {
-            call_user_func($callback, $this -> walkerClient,array($url,$statusCode,$referer));
+            call_user_func($callback, $this->walkerClient,$this->walkerClient->getStats());
         }
 
         // getting  href attributes belonging to nodes of type "a"
@@ -95,7 +99,7 @@ class Walker
         foreach ($nodes as $node) {
             $prefix = "";
             if (strpos($node->value, "http:") === false) {
-                $prefix = $this -> baseUrl;
+                $prefix = $this->baseUrl;
                 if (strpos($node->value, "/") !== 0) {
                     $prefix .= "/";
                 }
@@ -103,11 +107,11 @@ class Walker
 
             $linkUri = $prefix.$node->value;
 
-            if (! in_array($linkUri, $this -> links)) {
-                $this -> links[] = $linkUri;
+            if (! in_array($linkUri, $this->links)) {
+                $this->links[] = $linkUri;
             }
 
-            if ($this -> isValidUrl($linkUri)) {
+            if ($this->isValidUrl($linkUri)) {
                 $this->checkLinks($linkUri, $url, $callback);
             }
 
@@ -118,14 +122,14 @@ class Walker
 
         if (in_array($url, $this->urlsVisited)) {
             if ($referer != "") {
-                $this -> updateStat($url, $referer);
+                $this->updateStat($url, $referer);
             }
             return false;
         }
-        if (! $this -> isValidUrl($url)) {
+        if (! $this->isValidUrl($url)) {
             return false;
         }
-        if ( ! preg_match("`".$this -> subDomainsMask.$this -> domainWildCard."`", $urlDomain) || preg_match($this -> excludedFileExt,$url)) {
+        if ( ! preg_match("`".$this->subDomainsMask.$this->domainWildCard."`", $urlDomain) || preg_match($this->excludedFileExt,$url)) {
             return false;
         }
 
@@ -135,7 +139,7 @@ class Walker
         if (! is_string ( $url )) {
             return false;
         }
-        foreach ($this -> forbiddenPattern as $pattern) {
+        foreach ($this->forbiddenPattern as $pattern) {
             if (strpos($url,$pattern) !== false) {
                 return false;
                 break;
@@ -147,32 +151,26 @@ class Walker
         return true;
     }
     public function updateStat($url, $referer){
-        foreach ($this -> stats as $index=>$line) {
+        foreach ($this->stats as $index=>$line) {
             if ($line[0] == $url) {
                 $key = $index;
             }
         }
-        // if this url has been call internally by the browserkit client (within redirect)
-        if (!$key) {
-            $this -> stats[][0] = $url;
-            $this -> stats[][1] = $this -> walkerClient->getResponse()->getStatus();
-            $key = count(stats) - 1;
-        }
-        if (strpos($this -> stats[$key][2], $referer) === false) {
-            $tmpContent = explode(",", $this -> stats[$key][2]);
+        if (strpos($this->stats[$key][2], $referer) === false) {
+            $tmpContent = explode(",", $this->stats[$key][2]);
             $tmpContent[] = $referer;
-            $this -> stats[$key][2] = implode(",", $tmpContent);
+            $this->stats[$key][2] = implode(",", $tmpContent);
         }
     }
 
     public function getStats()
     {
-        return $this -> stats;
+        return $this->stats;
     }
 
     public function getLinks()
     {
-        return $this -> links;
+        return $this->links;
     }
 
 }

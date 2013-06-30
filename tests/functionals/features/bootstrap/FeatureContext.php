@@ -90,6 +90,8 @@ class FeatureContext extends BehatContext
      */
     public function iCrawlAllTheWebsite()
     {
+        // add any regexp for crawling other subdomains, example forl all subdomains :
+        // $this -> walker = new \Walker\Walker($this -> parameters["base_url"], ".*");
         $this -> walker = new \Walker\Walker($this -> parameters["base_url"]);
         echo "\nCrawling Website in process...";
         $this -> walker -> run(function ($client, $stats) {

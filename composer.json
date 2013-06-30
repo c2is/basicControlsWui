@@ -5,7 +5,8 @@
     ],
     "repositories": [
         {"type":"vcs", "url":"git2@gitlab.c2is.fr:c2is-core.git"},
-        {"type":"vcs", "url":"git2@gitlab.c2is.fr:c2is-theme-backend.git"}
+        {"type":"vcs", "url":"git2@gitlab.c2is.fr:c2is-theme-backend.git"},
+        {"type":"vcs", "url":"git2@gitlab.c2is.fr:c2is-plugin-user.git"}
     ],
     "require": {
         "c2is/core"               : "dev-master",
