@@ -16,7 +16,8 @@
         "behat/mink-goutte-driver": "*",
         "ext-curl"                : "*",
         "symfony/console"         : "2.2.*",
-        "symfony/process"         : "2.2.*"
+        "symfony/process"         : "2.2.*",
+        "symfony/validator"               : "2.2.*"
     },
     "minimum-stability": "dev",
     "autoload": {

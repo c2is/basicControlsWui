@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Process\Process;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class FeatureTestController implements ControllerProviderInterface
 {
@@ -25,13 +26,14 @@ class FeatureTestController implements ControllerProviderInterface
         $ctl->match('/', function (Request $request) use ($app) {
             // some default data for when the form is displayed the first time
             $form = $app['form.factory']->createBuilder('form')
-                ->add('url')
+                ->add('url', 'text', array(
+                    'constraints' => array(new Assert\Url())))
                 ->getForm()
             ;
             $trace = "";
             $pass = true;
             $data = "";
-
+            $formErrors = "";
             if ('POST' == $request->getMethod()) {
                 $form->bind($request);
 
@@ -39,6 +41,9 @@ class FeatureTestController implements ControllerProviderInterface
 
                     $data = $form->getData();
 
+                }
+                else {
+                    $formErrors = "Bad value given";
                 }
 
             }
@@ -50,6 +55,7 @@ class FeatureTestController implements ControllerProviderInterface
                 'trace' => $trace,
                 'pass'  => $pass,
                 'urlToCheck'  => $urlToCheck,
+                'formErrors' => $formErrors,
             ));
         });
 

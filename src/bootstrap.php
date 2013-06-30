@@ -13,6 +13,7 @@ use C2is\Core\Service as CoreService;
 use C2is\Theme\Backend\Theme as BackendTheme;
 
 use Silex\Provider\FormServiceProvider;
+use Silex\Provider\ValidatorServiceProvider;
 use Silex\Provider\TwigServiceProvider;
 use Silex\Provider\UrlGeneratorServiceProvider;
 use Silex\Provider\TranslationServiceProvider;
@@ -30,6 +31,7 @@ $app = new Application(__DIR__.'/..', 'cungfoo');
 $app['debug'] = $app['config_core']['debug'];
 
 $app->register(new FormServiceProvider());
+$app->register(new Silex\Provider\ValidatorServiceProvider());
 $app->register(new UrlGeneratorServiceProvider());
 $app->register(new TranslationServiceProvider());
 $app->register(new TwigServiceProvider(), array(

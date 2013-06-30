@@ -7,6 +7,11 @@
 {% endblock %}
 
 {% block trace %}
+{% if formErrors %}
+    <div class="formErrors">
+    {{ formErrors }}
+    </div>
+{% endif %}
 {% if urlToCheck %}
 <div>
     <iframe id="ifr" src="{{ app.request.basePath }}/iframe?urlToCheck={{ urlToCheck }}">Functionality unavailable in your browser</iframe>
