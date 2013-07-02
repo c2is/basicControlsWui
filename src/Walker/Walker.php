@@ -19,20 +19,22 @@ namespace Walker;
 class Walker
 {
     private $links;
-    public $stats;
     private $baseUrl;
     private $walkerClient;
     private $domainWildCard;
     private $subDomainsMask;
     private $excludedFileExt;
     private $forbiddenPattern;
+
+    public $stats;
+
     public function __construct($baseUrl, $subDomainsMask = null)
     {
         $this->links  = array();
         $this->urlsVisited  = array();
         $this->baseUrl = $baseUrl;
         if (strrpos($this->baseUrl, "/") == strlen($this->baseUrl)-1) {
-            $this->baseUrl = substr($this->baseUrl,0,strlen($this->baseUrl)-1);
+            $this->baseUrl = substr($this->baseUrl, 0, strlen($this->baseUrl)-1);
         }
 
         $this->excludedFileExt = "`\.(jpg|jpeg|gif|png)$`i";
@@ -45,9 +47,8 @@ class Walker
 
         if ($subDomainsMask != null) {
             $this->subDomainsMask = $subDomainsMask;
-        }
-        else {
-            $this->subDomainsMask = str_replace($this->domainWildCard,"",$domain);
+        } else {
+            $this->subDomainsMask = str_replace($this->domainWildCard, "", $domain);
         }
 
         $clientOptions = array(
@@ -65,22 +66,21 @@ class Walker
 
 
     }
-
-    public function start($callback = null) {
+    public function start($callback = null)
+    {
         $this->checkLinks($this->baseUrl, null, $callback);
     }
-
-    public function run($callback = null) {
+    public function run($callback = null)
+    {
         $this->checkLinks($this->baseUrl, null, $callback);
     }
-
     public function checkLinks($url, $referer = "", $callback = null)
     {
 
         if (! $this->isUrlToCheck($url, $referer)) {
             return true;
         }
-        if( ! $this->isValidUrl($url)) {
+        if ( ! $this->isValidUrl($url)) {
             return true;
         }
 
@@ -89,7 +89,7 @@ class Walker
 
 
         if (null !== $callback) {
-            call_user_func($callback, $this->walkerClient,$this->walkerClient->getStats());
+            call_user_func($callback, $this->walkerClient, $this->walkerClient->getStats());
         }
 
         // getting  href attributes belonging to nodes of type "a"
@@ -117,30 +117,33 @@ class Walker
 
         }
     }
-    public function isUrlToCheck($url, $referer) {
+    public function isUrlToCheck($url, $referer)
+    {
         $urlDomain = parse_url($url, PHP_URL_HOST);
 
         if (in_array($url, $this->urlsVisited)) {
             if ($referer != "") {
                 $this->updateStat($url, $referer);
             }
+
             return false;
         }
         if (! $this->isValidUrl($url)) {
             return false;
         }
-        if ( ! preg_match("`".$this->subDomainsMask.$this->domainWildCard."`", $urlDomain) || preg_match($this->excludedFileExt,$url)) {
+        if ( ! preg_match("`".$this->subDomainsMask.$this->domainWildCard."`", $urlDomain) || preg_match($this->excludedFileExt, $url)) {
             return false;
         }
 
         return true;
     }
-    public function isValidUrl($url){
-        if (! is_string ( $url )) {
+    public function isValidUrl($url)
+    {
+        if (! is_string($url)) {
             return false;
         }
         foreach ($this->forbiddenPattern as $pattern) {
-            if (strpos($url,$pattern) !== false) {
+            if (strpos($url, $pattern) !== false) {
                 return false;
                 break;
             }
@@ -148,10 +151,12 @@ class Walker
         if (! filter_var($url, FILTER_VALIDATE_URL)) {
             return false;
         }
+
         return true;
     }
-    public function updateStat($url, $referer){
-        foreach ($this->stats as $index=>$line) {
+    public function updateStat($url, $referer)
+    {
+        foreach ($this->stats as $index => $line) {
             if ($line[0] == $url) {
                 $key = $index;
             }
@@ -162,15 +167,12 @@ class Walker
             $this->stats[$key][2] = implode(",", $tmpContent);
         }
     }
-
     public function getStats()
     {
         return $this->stats;
     }
-
     public function getLinks()
     {
         return $this->links;
     }
-
 }
