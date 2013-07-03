@@ -6,7 +6,8 @@
     "repositories": [
         {"type":"vcs", "url":"git2@gitlab.c2is.fr:c2is-core.git"},
         {"type":"vcs", "url":"git2@gitlab.c2is.fr:c2is-theme-backend.git"},
-        {"type":"vcs", "url":"git2@gitlab.c2is.fr:c2is-plugin-user.git"}
+        {"type":"vcs", "url":"git2@gitlab.c2is.fr:c2is-plugin-user.git"},
+        {"type":"vcs", "url":"git@github.com:c2is/Walker.git"}
     ],
     "require": {
         "c2is/core"               : "dev-master",
@@ -17,7 +18,8 @@
         "ext-curl"                : "*",
         "symfony/console"         : "2.2.*",
         "symfony/process"         : "2.2.*",
-        "symfony/validator"               : "2.2.*"
+        "symfony/validator"               : "2.2.*",
+        "c2is/Walker" : "dev-master"
     },
     "minimum-stability": "dev",
     "autoload": {
