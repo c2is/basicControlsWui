@@ -167,6 +167,14 @@ class Walker
             $this->stats[$key][2] = implode(",", $tmpContent);
         }
     }
+    public function findStat($url)
+    {
+        foreach ($this->stats as $index => $line) {
+            if ($line[0] == $url) {
+                return $line;
+            }
+        }
+    }
     public function getStats()
     {
         return $this->stats;

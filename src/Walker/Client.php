@@ -29,9 +29,10 @@ class Client extends BaseClient
             $this->walker->stats[] = array($uri,$statusCode,$this->lastReferer);
         } else {
             $headers[] = "";
-            $statusCode = "202";
+            $statusCode = $this->walker->findStat($uri)[1];
             $response = new Response("", $statusCode, $headers);
         }
+
         $this->walker->urlsVisited[] = $uri;
         return $response;
 
@@ -44,4 +45,5 @@ class Client extends BaseClient
     {
         return array($this->lastUri, $this->lastStatus, $this->lastReferer);
     }
+
 }
