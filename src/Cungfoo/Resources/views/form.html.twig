@@ -14,7 +14,7 @@
 {% endif %}
 {% if urlToCheck %}
 <div>
-    <iframe id="ifr" src="{{ app.request.basePath }}/iframe?urlToCheck={{ urlToCheck }}">Functionality unavailable in your browser</iframe>
+    <iframe id="ifr" src="{{ app.request.basePath }}/iframe/{{ urlToCheck }}">Functionality unavailable in your browser</iframe>
 </div>
 {% endif %}
 
