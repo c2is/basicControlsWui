@@ -59,10 +59,10 @@ class FeatureTestController implements ControllerProviderInterface
             ));
         });
 
-        $ctl->match('/iframe', function (Request $request) use ($app) {
+        $ctl->match('/iframe/{protocol}://{urlToCheck}', function (Request $request, $protocol, $urlToCheck) use ($app) {
 
-
-            $urlToCheck = $request->query->get('urlToCheck');
+            // secure : get only url, no get's parameters
+            $urlToCheck = $protocol."://".parse_url($protocol."://".$urlToCheck, PHP_URL_HOST);
 
             $stream = function () use($urlToCheck, $request){
                 echo "<!DOCTYPE html>";
