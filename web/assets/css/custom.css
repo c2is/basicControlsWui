@@ -68,3 +68,10 @@ overflow: hidden;
     width:100%;
     text-align: center;
 }
+div {
+    display:inline;
+}
+label {
+    font-family: "Lato", sans-serif;
+    font-size: 12px;
+}

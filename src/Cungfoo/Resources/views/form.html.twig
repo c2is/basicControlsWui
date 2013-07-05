@@ -2,6 +2,15 @@
 {% block content %}
     <form action="#" method="post">
         {{ form_widget(form.url, {attr: {placeholder: 'please enter a url'}}) }}
+        <br>
+
+        {% if feature404On == true or formSent == false %}
+            {{ form_row(form.pagesStatus, {attr: {checked: 'checked'}})}}
+        {% else %}
+            {{ form_row(form.pagesStatus)}}
+        {% endif %}
+
+        {{ form_row(form.robots, {attr: {checked: 'checked'}}) }}
         {{ form_rest(form) }}
     </form>
 {% endblock %}
@@ -14,9 +23,8 @@
 {% endif %}
 {% if urlToCheck %}
 <div>
-    <iframe id="ifr" src="{{ app.request.basePath }}/iframe/{{ urlToCheck }}">Functionality unavailable in your browser</iframe>
+    <iframe id="ifr" src="{{ app.request.basePath }}/iframe/{{ urlToCheck }}/{{ features }}">Functionality unavailable in your browser</iframe>
 </div>
 {% endif %}
-
 {% endblock %}
 

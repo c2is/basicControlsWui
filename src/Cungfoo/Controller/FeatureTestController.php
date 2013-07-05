@@ -19,7 +19,8 @@ class FeatureTestController implements ControllerProviderInterface
      *
      * @return ControllerCollection A ControllerCollection instance
      */
-    public function connect(Application $app) {
+    public function connect(Application $app)
+    {
         $ctl = $app['controllers_factory'];
 
 
@@ -28,6 +29,8 @@ class FeatureTestController implements ControllerProviderInterface
             $form = $app['form.factory']->createBuilder('form')
                 ->add('url', 'text', array(
                     'constraints' => array(new Assert\Url())))
+                ->add('robots','checkbox',  array("label"=>"Robots and metas","required"=>false, "disabled"=>true))
+                ->add('pagesStatus','checkbox',  array("label"=>"No 404","required"=>false))
                 ->getForm()
             ;
             $trace = "";
@@ -36,35 +39,44 @@ class FeatureTestController implements ControllerProviderInterface
             $formErrors = "";
             if ('POST' == $request->getMethod()) {
                 $form->bind($request);
-
                 if ($form->isValid()) {
-
                     $data = $form->getData();
-
                 }
                 else {
                     $formErrors = "Bad value given";
                 }
-
             }
-
-            $urlToCheck = (is_array($data))? $data['url']:"";
+            $urlToCheck = "";
+            $features = array("robots");
+            if(is_array($data)) {
+                $urlToCheck = $data['url'];
+                if($data['pagesStatus']) {
+                    $features[] = "pagesStatus";
+                }
+            }
             // display the form
             return $app->render('form.html.twig', array(
                 'form'  => $form->createView(),
                 'trace' => $trace,
                 'pass'  => $pass,
                 'urlToCheck'  => $urlToCheck,
+                'features'  => implode("/",$features),
+                'feature404On'  => in_array("pagesStatus",$features),
+                'formSent' => ('POST' == $request->getMethod()),
                 'formErrors' => $formErrors,
             ));
         });
 
-        $ctl->match('/iframe/{protocol}://{urlToCheck}', function (Request $request, $protocol, $urlToCheck) use ($app) {
+        $ctl->match('/iframe/{protocol}://{urlToCheck}/{feature1}/{feature2}', function (Request $request, $protocol, $urlToCheck, $feature1, $feature2) use ($app){
 
             // secure : get only url, no get's parameters
             $urlToCheck = $protocol."://".parse_url($protocol."://".$urlToCheck, PHP_URL_HOST);
 
-            $stream = function () use($urlToCheck, $request){
+            $features = array();
+            ($feature1 != "")? $features[] = "features/".$feature1.".feature":"";
+            ($feature2 != "")? $features[] = "features/".$feature2.".feature":"";
+
+            $stream = function () use($urlToCheck, $request, $features){
                 echo "<!DOCTYPE html>";
                 echo "<html>";
                 echo "<head>";
@@ -81,17 +93,17 @@ class FeatureTestController implements ControllerProviderInterface
                 echo "<pre id='stdout'  class=''>";
                 flush();
                 $procTimeOut = 3600;
-                $process = new Process('export BEHAT_PARAMS="context[parameters][base_url]='.$urlToCheck.'";cd ../tests/functionals/;../../bin/behat',null, null, null,$procTimeOut);
-                $process->run(function ($type, $buffer) {
-                    if ('err' === $type) {
-                        echo $buffer;
-                    } else {
-                        echo $buffer;
-                        flush();
+                $exitCode = 0;
+                foreach ($features as $feature) {
+                    $process = $this->runProcess('export BEHAT_PARAMS="context[parameters][base_url]='.$urlToCheck.'";cd ../tests/functionals/;../../bin/behat '.$feature,null, null, null,$procTimeOut);
+                    if ($process->getExitCode() != 0) {
+                        $exitCode = 1;
                     }
-                });
+                }
+
+
                 echo "</pre>";
-                if ($process->getExitCode() == 0) {
+                if ($exitCode == 0) {
                     echo '<script language="JavaScript">$("#stdout").attr("class", "pass");</script>';
                     flush();
                 }
@@ -103,7 +115,23 @@ class FeatureTestController implements ControllerProviderInterface
                 flush();
             };
             return $app->stream($stream);
-        });
+        })
+            ->value("feature1", null)
+            ->value("feature2", null);
         return $ctl;
+    }
+    private function runProcess($process, $timout)
+    {
+        $process = new Process($process,null, null, null,$timout);
+        $process->run(function ($type, $buffer) {
+            if ('err' === $type) {
+                echo $buffer;
+            } else {
+                echo $buffer;
+                flush();
+            }
+        });
+
+        return $process;
     }
 }
