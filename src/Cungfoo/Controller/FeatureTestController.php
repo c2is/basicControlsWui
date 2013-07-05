@@ -29,7 +29,7 @@ class FeatureTestController implements ControllerProviderInterface
             $form = $app['form.factory']->createBuilder('form')
                 ->add('url', 'text', array(
                     'constraints' => array(new Assert\Url())))
-                ->add('robots','checkbox',  array("label"=>"Robots and metas","required"=>false, "disabled"=>true))
+                ->add('robots','checkbox',  array("label"=>"Check robots and metas","required"=>false, "disabled"=>true))
                 ->add('pagesStatus','checkbox',  array("label"=>"No 404","required"=>false))
                 ->getForm()
             ;
@@ -50,6 +50,9 @@ class FeatureTestController implements ControllerProviderInterface
             $features = array("robots");
             if(is_array($data)) {
                 $urlToCheck = $data['url'];
+                if($urlToCheck[strlen($urlToCheck)-1] == "/") {
+                    $urlToCheck = substr($urlToCheck, 0, strlen($urlToCheck)-1);
+                }
                 if($data['pagesStatus']) {
                     $features[] = "pagesStatus";
                 }
