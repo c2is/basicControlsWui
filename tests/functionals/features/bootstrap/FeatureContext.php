@@ -93,7 +93,10 @@ class FeatureContext extends BehatContext
         // add any regexp for crawling other subdomains, example forl all subdomains :
         // $this -> walker = new \Walker\Walker($this -> parameters["base_url"], ".*");
         $this->walker = new \Walker\Walker($this -> parameters["base_url"]);
-        $this->walker->storage->addColumn("stats","GOOGLE ANALYTICS");
+        if ($this->parameters["ga"] == "1") {
+            $this->walker->storage->addColumn("stats","GOOGLE ANALYTICS");
+        }
+
         echo "\nCrawling Website in process...";
         $this -> walker -> run(function ($crawler, $client) {
             $stats = $client->getStats();
@@ -153,20 +156,20 @@ class FeatureContext extends BehatContext
                     $tags[] = $info["GOOGLE ANALYTICS"];
                 }
             }
-
+            if (count($tags) > 0) {
+                echo "NOTICE ! Google tags found: \n".implode("\n",array_unique($tags))."\n";
+            }
             if (count($badUrls) > 0) {
                 throw new Exception(
                     "Pages with no Google Analytics tag found: \n".implode("\n",$badUrls)."\n"
                 );
-            } else {
-                echo "NOTICE ! Google tags found: \n".implode("\n",array_unique($tags))."\n";
             }
         }
         if ($this->parameters["404"] == "1") {
             $this->iShouldNotGetPageWithStatus(new PyStringNode("404"));
         }
 
-        $invalidUrls = $this -> walker -> getInvalidUrlsFound();
+        $invalidUrls = $this->walker->getInvalidUrlsFound();
 
         if (count($invalidUrls) > 0) {
             foreach ($invalidUrls as $info) {
