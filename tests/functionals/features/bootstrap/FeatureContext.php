@@ -92,10 +92,25 @@ class FeatureContext extends BehatContext
     {
         // add any regexp for crawling other subdomains, example forl all subdomains :
         // $this -> walker = new \Walker\Walker($this -> parameters["base_url"], ".*");
-        $this -> walker = new \Walker\Walker($this -> parameters["base_url"]);
+        $this->walker = new \Walker\Walker($this -> parameters["base_url"]);
+        $this->walker->storage->addColumn("stats","GOOGLE ANALYTICS");
         echo "\nCrawling Website in process...";
-        $this -> walker -> run(function ($client, $stats) {
-            echo "\n".$stats[0]." : ".$stats[1];
+        $this -> walker -> run(function ($crawler, $client) {
+            $stats = $client->getStats();
+            echo "\n".$stats["URL"]." : ".$stats["STATUS"];
+
+            if ($this->parameters["ga"] == "1") {
+                $nodes = $crawler->filterXPath('//script');
+
+                foreach ($nodes as $node) {
+                    if (property_exists($node,"textContent")) {
+                        if (preg_match("`(UA-[0-9-]*)`", $node->textContent, $matches)) {
+                            $this->walker->storage->update("stats", "URL", $stats["URL"], "GOOGLE ANALYTICS", $matches[1]);
+                        }
+                    }
+                }
+            }
+
             flush();
         });
         echo "\n";
@@ -107,11 +122,11 @@ class FeatureContext extends BehatContext
     public function iShouldNotGetPageWithStatus(PyStringNode $string)
     {
 
-        $stats = $this -> walker -> getStats();
+        $stats = $this -> walker->storage->get("stats");
         $badUrls = array();
         foreach ($stats as $info) {
-            if ((string) $info[1] == $string) {
-                $badUrls[] = $info[0];
+            if ((string) $info["STATUS"] == $string) {
+                $badUrls[] = $info["URL"];
             }
         }
 
@@ -121,5 +136,43 @@ class FeatureContext extends BehatContext
             );
         }
 
+    }
+    /**
+     * @Then /^I perform controls asked by wiwi$/
+     */
+    public function iPerformControlsAskedByWiwi()
+    {
+
+        if ($this->parameters["ga"] == "1") {
+            $stats = $this -> walker->storage->get("stats");
+            $badUrls = array();
+            foreach ($stats as $info) {
+                if ((string) $info["GOOGLE ANALYTICS"] == "") {
+                    $badUrls[] = $info["URL"];
+                } else {
+                    $tags[] = $info["GOOGLE ANALYTICS"];
+                }
+            }
+
+            if (count($badUrls) > 0) {
+                throw new Exception(
+                    "Pages with no Google Analytics tag found: \n".implode("\n",$badUrls)."\n"
+                );
+            } else {
+                echo "NOTICE ! Google tags found: \n".implode("\n",array_unique($tags))."\n";
+            }
+        }
+        if ($this->parameters["404"] == "1") {
+            $this->iShouldNotGetPageWithStatus(new PyStringNode("404"));
+        }
+
+        $invalidUrls = $this -> walker -> getInvalidUrlsFound();
+
+        if (count($invalidUrls) > 0) {
+            foreach ($invalidUrls as $info) {
+                $noticedUrls[] = $info[0]." linked by : ".$info[1];
+            }
+            echo "NOTICE ! some url with bad format have been ignored: \n".implode("\n",$noticedUrls)."\n";
+        }
     }
 }

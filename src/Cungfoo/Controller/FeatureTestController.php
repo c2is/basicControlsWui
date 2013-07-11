@@ -30,7 +30,8 @@ class FeatureTestController implements ControllerProviderInterface
                 ->add('url', 'text', array(
                     'constraints' => array(new Assert\Url())))
                 ->add('robots','checkbox',  array("label"=>"Check robots and metas","required"=>false, "disabled"=>true))
-                ->add('pagesStatus','checkbox',  array("label"=>"No 404","required"=>false))
+                ->add('404','checkbox',  array("label"=>"No 404","required"=>false))
+                ->add('googleAnalytics','checkbox',  array("label"=>"GAnalytics mandatory","required"=>false))
                 ->getForm()
             ;
             $trace = "";
@@ -48,14 +49,18 @@ class FeatureTestController implements ControllerProviderInterface
             }
             $urlToCheck = "";
             $features = array("robots");
+            $perform404 = false;
+            $preformGoogleAnalytics = false;
             if(is_array($data)) {
                 $urlToCheck = $data['url'];
                 if($urlToCheck[strlen($urlToCheck)-1] == "/") {
                     $urlToCheck = substr($urlToCheck, 0, strlen($urlToCheck)-1);
                 }
-                if($data['pagesStatus']) {
-                    $features[] = "pagesStatus";
+                if($data['404'] || $data['googleAnalytics']) {
+                    $features[] = "eachPageControl";
                 }
+                $perform404 = ($data['404']);
+                $preformGoogleAnalytics = ($data['googleAnalytics']);
             }
             // display the form
             return $app->render('form.html.twig', array(
@@ -64,7 +69,8 @@ class FeatureTestController implements ControllerProviderInterface
                 'pass'  => $pass,
                 'urlToCheck'  => $urlToCheck,
                 'features'  => implode("/",$features),
-                'feature404On'  => in_array("pagesStatus",$features),
+                'feature404On'  => $perform404,
+                'googleAnalyticsOn'  => $preformGoogleAnalytics,
                 'formSent' => ('POST' == $request->getMethod()),
                 'formErrors' => $formErrors,
             ));
@@ -78,6 +84,8 @@ class FeatureTestController implements ControllerProviderInterface
             $features = array();
             ($feature1 != "")? $features[] = "features/".$feature1.".feature":"";
             ($feature2 != "")? $features[] = "features/".$feature2.".feature":"";
+
+
 
             $stream = function () use($urlToCheck, $request, $features){
                 echo "<!DOCTYPE html>";
@@ -97,8 +105,18 @@ class FeatureTestController implements ControllerProviderInterface
                 flush();
                 $procTimeOut = 3600;
                 $exitCode = 0;
+
+
+                $behatParams[] = 'context[parameters][base_url]='.$urlToCheck;
+                $behatParams[] = 'context[parameters][ga]='.$request->query->get('ga');
+                $behatParams[] = 'context[parameters][404]='.$request->query->get('404');
+
+                $shellCommands[] = 'export BEHAT_PARAMS="'.implode("&",$behatParams).'"';
+                $shellCommands[] = 'cd ../tests/functionals/';
+                $shellCommands[] = '../../bin/behat ';
+
                 foreach ($features as $feature) {
-                    $process = $this->runProcess('export BEHAT_PARAMS="context[parameters][base_url]='.$urlToCheck.'";cd ../tests/functionals/;../../bin/behat '.$feature,null, null, null,$procTimeOut);
+                    $process = $this->runProcess(implode(";",$shellCommands).$feature,null, null, null,$procTimeOut);
                     if ($process->getExitCode() != 0) {
                         $exitCode = 1;
                     }
